@@ -10,22 +10,38 @@ import {
 } from 'prosemirror-model';
 import { CellAttrs, MutableAttrs } from './util';
 
+// A naive way to fix the colwidths attribute, from pixels to percentage
+const fixupColWidth = (number: string) => {
+  const numberWidth = Number(number);
+
+  if (numberWidth > 100) {
+    // return 0 to reset the width
+    return 0;
+  }
+
+  return numberWidth;
+};
+
 function getCellAttrs(dom: HTMLElement | string, extraAttrs: Attrs): Attrs {
   if (typeof dom === 'string') {
     return {};
   }
 
   const widthAttr = dom.getAttribute('data-colwidth');
+
   const widths =
-    widthAttr && /^\d+(,\d+)*$/.test(widthAttr)
-      ? widthAttr.split(',').map((s) => Number(s))
+    widthAttr && /^\d+(\.\d+)*(,\d+(\.\d+)*)*$/.test(widthAttr)
+      ? widthAttr.split(',').map(fixupColWidth)
       : null;
+
   const colspan = Number(dom.getAttribute('colspan') || 1);
+
   const result: MutableAttrs = {
     colspan,
     rowspan: Number(dom.getAttribute('rowspan') || 1),
     colwidth: widths && widths.length == colspan ? widths : null,
   } satisfies CellAttrs;
+
   for (const prop in extraAttrs) {
     const getter = extraAttrs[prop].getFromDOM;
     const value = getter && getter(dom);
