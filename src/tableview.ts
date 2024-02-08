@@ -57,7 +57,7 @@ export function updateColumnsOnResize(
     for (let j = 0; j < colspan; j++, col++) {
       const hasWidth =
         overrideCol == col ? overrideValue : colwidth && colwidth[j];
-      const cssWidth = hasWidth ? hasWidth + 'px' : '';
+      const cssWidth = hasWidth ? `${hasWidth}%` : '';
       totalWidth += hasWidth || cellMinWidth;
       if (!hasWidth) fixedWidth = false;
       if (!nextDOM) {
