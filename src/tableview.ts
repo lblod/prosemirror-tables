@@ -46,8 +46,6 @@ export function updateColumnsOnResize(
   overrideCol?: number,
   overrideValue?: number,
 ): void {
-  let totalWidth = 0;
-  let fixedWidth = true;
   let nextDOM = colgroup.firstChild as HTMLElement;
   const row = node.firstChild;
   if (!row) return;
@@ -58,8 +56,6 @@ export function updateColumnsOnResize(
       const hasWidth =
         overrideCol == col ? overrideValue : colwidth && colwidth[j];
       const cssWidth = hasWidth ? `${hasWidth}%` : '';
-      totalWidth += hasWidth || cellMinWidth;
-      if (!hasWidth) fixedWidth = false;
       if (!nextDOM) {
         colgroup.appendChild(document.createElement('col')).style.width =
           cssWidth;
@@ -74,13 +70,5 @@ export function updateColumnsOnResize(
     const after = nextDOM.nextSibling;
     nextDOM.parentNode?.removeChild(nextDOM);
     nextDOM = after as HTMLElement;
-  }
-
-  if (fixedWidth) {
-    table.style.width = totalWidth + 'px';
-    table.style.minWidth = '';
-  } else {
-    table.style.width = '';
-    table.style.minWidth = totalWidth + 'px';
   }
 }
