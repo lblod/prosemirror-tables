@@ -73,9 +73,6 @@ devDependencies:
   vitest:
     specifier: ^0.34.4
     version: 0.34.4(happy-dom@11.0.2)
-  workaround-broken-npm-prepack-behavior:
-    specifier: github:cspotcode/workaround-broken-npm-prepack-behavior#1a7adbbb8a527784daf97edad6ba42d6e96611f6
-    version: github.com/cspotcode/workaround-broken-npm-prepack-behavior/1a7adbbb8a527784daf97edad6ba42d6e96611f6
 
 packages:
 
@@ -2236,11 +2233,4 @@ packages:
   /yocto-queue@1.0.0:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
-    dev: true
-
-  github.com/cspotcode/workaround-broken-npm-prepack-behavior/1a7adbbb8a527784daf97edad6ba42d6e96611f6:
-    resolution: {tarball: https://codeload.github.com/cspotcode/workaround-broken-npm-prepack-behavior/tar.gz/1a7adbbb8a527784daf97edad6ba42d6e96611f6}
-    name: workaround-broken-npm-prepack-behavior
-    version: 0.0.1
-    hasBin: true
     dev: true
