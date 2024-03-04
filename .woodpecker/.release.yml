@@ -9,6 +9,7 @@ steps:
     settings:
       token:
         from_secret: npm_access_token
+      access: public
 when:
   event: tag
   ref: refs/tags/v*
