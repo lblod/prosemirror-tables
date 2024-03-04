@@ -1,0 +1,29 @@
+steps:
+  install:
+    image: node:20-slim
+    commands:
+      - corepack enable
+      - pnpm i --frozen-lockfile
+  lint:
+    image: node:20-slim
+    commands:
+      - corepack enable
+      - pnpm lint
+  typecheck:
+    image: node:20-slim
+    commands:
+      - corepack enable
+      - pnpm typecheck
+  test:
+    image: node:20-slim
+    commands:
+      - corepack enable
+      - pnpm test
+  build:
+    image: node:20-slim
+    commands:
+      - corepack enable
+      - pnpm build
+when:
+  event:
+    - pull_request
