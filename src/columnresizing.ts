@@ -492,6 +492,9 @@ function updateDraggingOffset(view: EditorView, value: number): void {
   );
 }
 
+// cache to keep track of the positions where we have applied colwidth
+const colWidthCache = new Map<number, number[]>();
+
 function setColWidth({
   map,
   col,
@@ -515,11 +518,21 @@ function setColWidth({
     const attrs = table.nodeAt(pos)!.attrs as CellAttrs;
     const index = attrs.colspan == 1 ? 0 : col - map.colCount(pos);
     if (attrs.colwidth && attrs.colwidth[index] == width) continue;
-    const colwidth = attrs.colwidth
+
+    const position = start + pos;
+    const colWidthFromCache = colWidthCache.get(position);
+
+    // Prefer values from cache, because they have correct width from the previous step
+    const colwidth = colWidthFromCache
+      ? colWidthFromCache
+      : attrs.colwidth
       ? attrs.colwidth.slice()
       : zeroes(attrs.colspan);
+
     colwidth[index] = width;
-    tr.setNodeMarkup(start + pos, null, { ...attrs, colwidth: colwidth });
+
+    tr.setNodeMarkup(position, null, { ...attrs, colwidth });
+    colWidthCache.set(position, colwidth);
   }
 }
 
@@ -563,6 +576,8 @@ function updateColumnWidth({
       start: start,
     });
   }
+
+  colWidthCache.clear();
 
   if (tr.docChanged) view.dispatch(tr);
 }

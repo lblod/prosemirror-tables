@@ -52,6 +52,9 @@ devDependencies:
   prosemirror-example-setup:
     specifier: ^1.2.2
     version: 1.2.2
+  prosemirror-gapcursor:
+    specifier: ^1.3.2
+    version: 1.3.2
   prosemirror-menu:
     specifier: ^1.2.2
     version: 1.2.2
