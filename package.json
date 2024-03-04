@@ -1,7 +1,7 @@
 {
-  "name": "prosemirror-tables",
-  "version": "1.3.7",
-  "description": "ProseMirror's rowspan/colspan tables component",
+  "name": "@say-editor/prosemirror-tables",
+  "version": "0.0.0",
+  "description": "Fork of prosemirror-tables for the say-editor",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -15,9 +15,10 @@
     "./style/tables.css": "./style/tables.css"
   },
   "license": "MIT",
+  "author": "redpencil.io",
   "repository": {
     "type": "git",
-    "url": "git://github.com/prosemirror/prosemirror-tables.git"
+    "url": "https://github.com/lblod/prosemirror-tables.git"
   },
   "maintainers": [
     {
