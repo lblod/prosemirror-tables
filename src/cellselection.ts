@@ -217,6 +217,10 @@ export class CellSelection extends Selection {
     }
   }
 
+  public isMultipleCellSelection(): boolean {
+    return this.$anchorCell.pos !== this.$headCell.pos;
+  }
+
   // True if this selection goes all the way from the top to the
   // bottom of the table.
   public isColSelection(): boolean {

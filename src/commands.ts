@@ -568,7 +568,28 @@ export function setCellAttr(name: string, value: unknown): Command {
   return function (state, dispatch) {
     if (!isInTable(state)) return false;
     const $cell = selectionCell(state);
-    if ($cell.nodeAfter!.attrs[name] === value) return false;
+
+    if (
+      state.selection instanceof CellSelection &&
+      state.selection.isMultipleCellSelection()
+    ) {
+      const cellAttrs = new Set();
+
+      /**
+       * If selection is multiple cell selection, check if all cells have the
+       * same attribute value. If they do, return false.
+       */
+      state.selection.forEachCell((node) => {
+        cellAttrs.add(node.attrs[name]);
+      });
+
+      if (cellAttrs.size === 1 && cellAttrs.has(value)) {
+        return false;
+      }
+    } else if ($cell.nodeAfter!.attrs[name] === value) {
+      return false;
+    }
+
     if (dispatch) {
       const tr = state.tr;
       if (state.selection instanceof CellSelection)
