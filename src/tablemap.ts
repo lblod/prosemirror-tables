@@ -16,6 +16,16 @@ import { CellAttrs } from './util';
  */
 export type ColWidths = number[];
 
+export const isColWidths = (value: unknown): value is ColWidths => {
+  if (!Array.isArray(value)) return false;
+
+  for (const item of value) {
+    if (typeof item !== 'number') return false;
+  }
+
+  return true;
+};
+
 /**
  * @public
  */
