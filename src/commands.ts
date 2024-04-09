@@ -11,7 +11,7 @@ import {
 import { CellSelection } from './cellselection';
 import type { Direction } from './input';
 import { tableNodeTypes, TableRole } from './schema';
-import { Rect, TableMap } from './tablemap';
+import { isColWidths, Rect, TableMap } from './tablemap';
 import {
   addColSpan,
   cellAround,
@@ -56,6 +56,41 @@ export function selectedRect(state: EditorState): TableRect {
   return { ...rect, tableStart, map, table };
 }
 
+function decreaseAdjacentColumnWidth({
+  tr,
+  tableStart,
+  table,
+  map,
+  row,
+  col,
+}: {
+  tr: Transaction;
+  tableStart: number;
+  table: Node;
+  map: TableMap;
+  row: number;
+  col: number;
+}): [number] | undefined {
+  const pos = map.positionAt(row, col, table);
+  const cellAdjust = table.nodeAt(pos);
+
+  const colwidths = cellAdjust?.attrs.colwidth;
+
+  if (!isColWidths(colwidths)) {
+    return undefined;
+  }
+
+  const newColWidth = [colwidths[0] / 2] as [number];
+
+  tr.setNodeAttribute(
+    tr.mapping.map(tableStart + pos),
+    'colwidth',
+    newColWidth,
+  );
+
+  return newColWidth;
+}
+
 /**
  * Add a column at the given position in a table.
  *
@@ -65,6 +100,11 @@ export function addColumn(
   tr: Transaction,
   { map, tableStart, table }: TableRect,
   col: number,
+  /**
+   * Column where we should adjust colwidth and any other attributes,
+   * to accommodate the new column.
+   */
+  colAdjust: number,
 ): Transaction {
   let refColumn: number | null = col > 0 ? -1 : 0;
   if (columnIsHeader(map, table, col + refColumn)) {
@@ -90,7 +130,20 @@ export function addColumn(
           ? tableNodeTypes(table.type.schema).cell
           : table.nodeAt(map.map[index + refColumn])!.type;
       const pos = map.positionAt(row, col, table);
-      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill()!);
+
+      const colwidth = decreaseAdjacentColumnWidth({
+        map,
+        row,
+        col: colAdjust,
+        table,
+        tr,
+        tableStart,
+      });
+
+      tr.insert(
+        tr.mapping.map(tableStart + pos),
+        type.createAndFill({ colwidth })!,
+      );
     }
   }
   return tr;
@@ -108,7 +161,7 @@ export function addColumnBefore(
   if (!isInTable(state)) return false;
   if (dispatch) {
     const rect = selectedRect(state);
-    dispatch(addColumn(state.tr, rect, rect.left));
+    dispatch(addColumn(state.tr, rect, rect.left, rect.left));
   }
   return true;
 }
@@ -125,10 +178,71 @@ export function addColumnAfter(
   if (!isInTable(state)) return false;
   if (dispatch) {
     const rect = selectedRect(state);
-    dispatch(addColumn(state.tr, rect, rect.right));
+    dispatch(addColumn(state.tr, rect, rect.right, rect.right - 1));
   }
   return true;
 }
+
+function increaseAdjacentColumnWidth({
+  col,
+  map,
+  cell,
+  row,
+  table,
+  tr,
+  tableStart,
+}: {
+  col: number;
+  map: TableMap;
+  cell: Node;
+  row: number;
+  table: Node;
+  tr: Transaction;
+  tableStart: number;
+}) {
+  const colWidthAttribute = cell.attrs.colwidth;
+
+  if (!isColWidths(colWidthAttribute)) {
+    return;
+  }
+
+  const [colWidthOfColumnThatWillBeDeleted] = colWidthAttribute;
+
+  // Column where we should adjust colwidth and any other attributes.
+  const targetColumn = getTargetColumn(col, map);
+
+  const nextCollCellPos = map.positionAt(row, targetColumn, table);
+  const nextColCell = table.nodeAt(nextCollCellPos);
+
+  const nextCellColWidths = nextColCell?.attrs.colwidth;
+
+  if (!isColWidths(nextCellColWidths)) {
+    return;
+  }
+
+  const [colWidthOfColumnThatShouldIncreaseInSize] = nextCellColWidths;
+
+  tr.setNodeAttribute(
+    tr.mapping.map(tableStart + nextCollCellPos),
+    'colwidth',
+    [
+      colWidthOfColumnThatShouldIncreaseInSize +
+        colWidthOfColumnThatWillBeDeleted,
+    ],
+  );
+}
+
+/**
+ * @param col - Zero (0) based column index
+ * @param map - TableMap, `map.width` is 1 index based
+ */
+const getTargetColumn = (col: number, map: TableMap) => {
+  if (col === 0 && map.width > 1) {
+    return col + 1;
+  }
+
+  return col - 1;
+};
 
 /**
  * @public
@@ -156,6 +270,17 @@ export function removeColumn(
       );
     } else {
       const start = tr.mapping.slice(mapStart).map(tableStart + pos);
+
+      increaseAdjacentColumnWidth({
+        col,
+        map,
+        cell,
+        row,
+        table,
+        tr,
+        tableStart,
+      });
+
       tr.delete(start, start + cell.nodeSize);
     }
     row += attrs.rowspan;
