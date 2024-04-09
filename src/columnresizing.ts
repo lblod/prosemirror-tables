@@ -266,6 +266,8 @@ function handleMouseDown(
   event: MouseEvent,
   cellMinWidth: number,
 ): boolean {
+  const win = view.dom.ownerDocument.defaultView ?? window;
+
   const pluginState = columnResizingPluginKey.getState(view.state);
   if (!pluginState || pluginState.activeHandle == -1 || pluginState.dragging)
     return false;
@@ -301,9 +303,8 @@ function handleMouseDown(
   });
 
   function finish(event: MouseEvent) {
-    window.removeEventListener('mouseup', finish);
-    window.removeEventListener('mousemove', move);
-
+    win.removeEventListener('mouseup', finish);
+    win.removeEventListener('mousemove', move);
     const pluginState = columnResizingPluginKey.getState(view.state);
 
     if (pluginState?.dragging) {
@@ -353,8 +354,8 @@ function handleMouseDown(
     }
   }
 
-  window.addEventListener('mouseup', finish);
-  window.addEventListener('mousemove', move);
+  win.addEventListener('mouseup', finish);
+  win.addEventListener('mousemove', move);
   event.preventDefault();
   return true;
 }
