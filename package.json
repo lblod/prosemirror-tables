@@ -1,6 +1,6 @@
 {
   "name": "@say-editor/prosemirror-tables",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Fork of prosemirror-tables for the say-editor",
   "type": "module",
   "main": "dist/index.cjs",
